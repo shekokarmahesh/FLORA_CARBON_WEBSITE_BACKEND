@@ -45,6 +45,44 @@ mongoose
 // --- Health check ---
 app.get('/health', (_req, res) => res.status(200).send('ok'));
 
+// --- Self-ping to keep server awake (optional) ---
+if (process.env.NODE_ENV === 'production') {
+  const https = require('https');
+  const url = require('url');
+  
+  const pingSelf = () => {
+    const serverUrl = process.env.SERVER_URL || 'https://your-app-name.onrender.com';
+    const parsedUrl = url.parse(`${serverUrl}/health`);
+    
+    const options = {
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port || 443,
+      path: parsedUrl.path,
+      method: 'GET',
+      timeout: 10000
+    };
+    
+    const req = https.request(options, (res) => {
+      console.log(`Self-ping successful: ${res.statusCode}`);
+    });
+    
+    req.on('error', (err) => {
+      console.log('Self-ping failed:', err.message);
+    });
+    
+    req.on('timeout', () => {
+      console.log('Self-ping timeout');
+      req.destroy();
+    });
+    
+    req.end();
+  };
+  
+  // Ping every 10 minutes
+  setInterval(pingSelf, 10 * 60 * 1000);
+  console.log('Self-ping mechanism activated');
+}
+
 // --- Routes ---
 app.use('/api/auth', require('./routes/auth'));
 

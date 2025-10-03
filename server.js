@@ -43,7 +43,13 @@ mongoose
   });
 
 // --- Health check ---
-app.get('/health', (_req, res) => res.status(200).send('ok'));
+app.get('/health', (_req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
 
 // --- Self-ping to keep server awake (optional) ---
 if (process.env.NODE_ENV === 'production') {
@@ -51,7 +57,7 @@ if (process.env.NODE_ENV === 'production') {
   const url = require('url');
   
   const pingSelf = () => {
-    const serverUrl = process.env.SERVER_URL || 'https://your-app-name.onrender.com';
+    const serverUrl = process.env.SERVER_URL || 'https://flora-carbon-website-backend.onrender.com';
     const parsedUrl = url.parse(`${serverUrl}/health`);
     
     const options = {

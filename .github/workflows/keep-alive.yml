@@ -12,4 +12,4 @@ jobs:
     steps:
       - name: Ping health endpoint
         run: |
-          curl -f https://your-app-name.onrender.com/health || exit 1
+          curl -f https://flora-carbon-website-backend.onrender.com/health || exit 1
